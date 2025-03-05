@@ -1,0 +1,5 @@
+name: EXPManager
+version: '1.0-SNAPSHOT'
+main: EXPManager.EXPManager
+api-version: '1.20'
+depend: [MMOItems, MythicMobs, MongoLibraryPlugin, MMOCore]
