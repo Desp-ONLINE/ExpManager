@@ -91,10 +91,7 @@ public class EXPListener implements Listener {
             double mobLevel = event.getMobLevel();
             int playerLevel = mmoCoreAPI.getPlayerData(player).getLevel();
 
-            if (Math.abs(mobLevel - playerLevel) >= levelDiffLimit) {
-                player.sendActionBar("§c몬스터와의 레벨 차이가 "+levelDiffLimit+" 이상이어서 경험치를 얻을 수 없습니다!");
-                return;
-            }
+
 
             MonsterDto monsterDto = monsters.get(killedMonsterName);
             MMOPlayerData mmoPlayerData = MMOPlayerData.get(player.getUniqueId());
@@ -106,6 +103,10 @@ public class EXPListener implements Listener {
 
             int rewardExp = v + (v  * (getMultiply(event) / 100));
 
+            if (Math.abs(mobLevel - playerLevel) >= levelDiffLimit) {
+                player.sendActionBar("§c몬스터와의 레벨 차이가 "+levelDiffLimit+" 이상이어서 경험치가 50% 감소되어 지급됩니다!");
+                rewardExp /= 2;
+            }
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), String.format("huds popup %s exp-message 20 %s",player.getName(),"§a+exp §f"+rewardExp));
 
             mmoCoreAPI.getPlayerData(player).giveExperience(rewardExp, EXPSource.OTHER);
