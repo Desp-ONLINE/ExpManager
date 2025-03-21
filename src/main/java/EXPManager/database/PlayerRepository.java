@@ -1,13 +1,13 @@
 package EXPManager.database;
 
 import EXPManager.dto.PlayerDto;
-import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.ReplaceOptions;
 import java.util.HashMap;
 import java.util.Map;
 import org.bson.Document;
+import org.bukkit.entity.Player;
 
 public class PlayerRepository {
 
@@ -18,7 +18,6 @@ public class PlayerRepository {
     public PlayerRepository() {
         DatabaseRegister database = new DatabaseRegister();
         this.playerDB = database.getDatabase().getCollection("PlayerElixir");
-//        loadPlayerInfo();
     }
 
     public static synchronized PlayerRepository getInstance() {
@@ -28,26 +27,38 @@ public class PlayerRepository {
         return instance;
     }
 
-    public void loadPlayerInfo() {
-        FindIterable<Document> documents = playerDB.find();
-        for (Document document : documents) {
-            String user_id = document.getString("user_id");
-            String uuid = document.getString("uuid");
+    public void loadPlayerInfo(Player player) {
+        String uuid = player.getUniqueId().toString();
+        String user_id = player.getName();
+        Document document = new Document("uuid", uuid);
 
-            PlayerDto playerDto = PlayerDto.builder()
-                    .user_id(user_id)
-                    .uuid(uuid)
-                    .leftDuration(document.getInteger("leftDuration"))
-                    .multiply(document.getInteger("multiply"))
-                    .latestUsedItem("latestUsedItem")
-                    .build();
-
-            players.put(uuid, playerDto);
+        if (playerDB.find(Filters.eq("uuid", uuid)).first() == null) {
+            Document newUser = new Document()
+                    .append("user_id", user_id)
+                    .append("uuid", uuid)
+                    .append("leftDuration", 0)
+                    .append("multiply", 1)
+                    .append("latestUsedItem", "");
+            playerDB.insertOne(newUser);
         }
+        int leftDuration = playerDB.find(document).first().getInteger("leftDuration");
+        int multiply = playerDB.find(document).first().getInteger("multiply");
+        String latestUsedItem = playerDB.find(document).first().getString("latestUsedItem");
+
+        PlayerDto playerDto = PlayerDto.builder()
+                .user_id(user_id)
+                .uuid(uuid)
+                .leftDuration(leftDuration)
+                .multiply(multiply)
+                .latestUsedItem(latestUsedItem)
+                .build();
+
+        players.put(uuid, playerDto);
     }
 
-    public void savePlayerLog(String uuid, Map<String, PlayerDto> players) {
-        PlayerDto playerDto = players.get(uuid);
+    public void savePlayerLog(Player player) {
+        PlayerDto playerDto = players.get(player.getUniqueId().toString());
+
         Document playerDocument = new Document()
                 .append("user_id", playerDto.getUser_id())
                 .append("uuid", playerDto.getUuid())
@@ -72,25 +83,6 @@ public class PlayerRepository {
 
             playerDto.setLeftDuration(newDuration);
             players.replace(uuid, playerDto);
-        }
-    }
-
-    public Map<String, PlayerDto> getPlayers() {
-        return players;
-    }
-
-    public PlayerDto getPlayer(String uuid, String user_id) {
-        Document query = playerDB.find(Filters.eq("uuid", uuid)).first();
-
-        if (query != null) {
-            String userId = query.getString("user_id");
-            int leftDuration = query.getInteger("leftDuration");
-            return PlayerDto.builder().user_id(userId).uuid(uuid).leftDuration(leftDuration).multiply(query.getInteger("multiply")).latestUsedItem(query.getString("latestUsedItem")).build();
-        } else {
-            PlayerDto newDto = PlayerDto.builder().user_id(user_id).uuid(uuid).leftDuration(0).multiply(1).latestUsedItem("default").build();
-            players.put(uuid, newDto);
-            savePlayerLog(uuid, players);
-            return newDto;
         }
     }
 }

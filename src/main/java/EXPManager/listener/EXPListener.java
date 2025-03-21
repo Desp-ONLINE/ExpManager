@@ -20,61 +20,25 @@ import net.Indyuce.mmocore.api.MMOCoreAPI;
 import net.Indyuce.mmocore.experience.EXPSource;
 import net.Indyuce.mmoitems.MMOItems;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.scheduler.BukkitRunnable;
 
 public class EXPListener implements Listener {
 
-    private final ElixirRepository elixirRepository;
-    private final MonsterRepository monsterRepository;
-    private final PlayerRepository playerRepository;
-    private final ConfigRepository configRepository;
+    public  ElixirRepository elixirRepository;
+    public  MonsterRepository monsterRepository;
+    public  PlayerRepository playerRepository;
+    public  ConfigRepository configRepository;
 
     public EXPListener() {
         this.playerRepository = PlayerRepository.getInstance();
         this.elixirRepository = ElixirRepository.getInstance();
         this.monsterRepository = MonsterRepository.getInstance();
         this.configRepository = ConfigRepository.getInstance();
-
-        // 5초마다 캐시 크기 출력하는 스케줄러 실행
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                int cacheSize = players.size();
-                System.out.println("EXPManager playerCache = " + cacheSize);
-            }
-        }.runTaskTimer(EXPManager.getInstance(), 0L, 100L); // 즉시 실행 후 100틱(5초)마다 반복
-    }
-
-    @EventHandler
-    public void onPlayerJoin(PlayerJoinEvent event) {
-//        if (players == null) {
-//            PlayerRepository playerRepository = PlayerRepository.getInstance();
-//            players = playerRepository.getPlayers();
-//        }
-//        players = PlayerRepository.getInstance().getPlayers();
-
-        Player player = event.getPlayer();
-        String uuid = player.getUniqueId().toString();
-        String user_id = player.getName();
-
-        PlayerDto newDto = playerRepository.getPlayer(uuid, user_id);
-
-        players.put(uuid, newDto);
-        //playerRepository.savePlayerLog(uuid, players);
-    }
-
-    @EventHandler
-    public void onPlayerQuit(PlayerQuitEvent event) {
-        Player player = event.getPlayer();
-        String uuid = player.getUniqueId().toString();
-        playerRepository.savePlayerLog(uuid, players);
     }
 
     @EventHandler
@@ -87,6 +51,12 @@ public class EXPListener implements Listener {
         String playerRightHandItemId = MMOItems.getID(itemInMainHand);
         if(event.getAction().isRightClick() && elixirCache.containsKey(playerRightHandItemId)) {
             event.setCancelled(true);
+
+            if (itemInMainHand.getAmount() > 1) {
+                itemInMainHand.setAmount(itemInMainHand.getAmount() - 1);
+            } else {
+                player.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
+            }
 
             ElixirDto elixirDto = elixirCache.get(playerRightHandItemId);
             int duration = elixirDto.getDuration();
@@ -109,20 +79,19 @@ public class EXPListener implements Listener {
         ConfigDto configDto = configRepository.getConfigDto();
         int levelDiffLimit = configDto.getLevelDiffLimit();
 
-        if(!(event.getKiller() instanceof Player)){
+        if(!(event.getKiller() instanceof Player player)){
             return;
         }
-        Player player = (Player) event.getKiller();
         String killedMonsterName = event.getMob().getType().getInternalName();
 
         Map<String, MonsterDto> monsters = monsterRepository.getMonsters();
         if (monsters.containsKey(killedMonsterName)) {
             MMOCoreAPI mmoCoreAPI = new MMOCoreAPI(EXPManager.getInstance());
-            int monsterLevel = (int) event.getMob().getLevel();
+
             double mobLevel = event.getMobLevel();
             int playerLevel = mmoCoreAPI.getPlayerData(player).getLevel();
 
-            if ((playerLevel - monsterLevel) >= levelDiffLimit) {
+            if (Math.abs(mobLevel - playerLevel) >= levelDiffLimit) {
                 player.sendActionBar("§c몬스터와의 레벨 차이가 "+levelDiffLimit+" 이상이어서 경험치를 얻을 수 없습니다!");
                 return;
             }
@@ -130,11 +99,12 @@ public class EXPListener implements Listener {
             MonsterDto monsterDto = monsters.get(killedMonsterName);
             MMOPlayerData mmoPlayerData = MMOPlayerData.get(player.getUniqueId());
             StatMap statMap = mmoPlayerData.getStatMap();
+
             double userExpAdditionalStat = statMap.getStat("ADDITIONAL_EXPERIENCE");
             int exp = monsterDto.getExp();
-            int v = (int) (exp + exp * (userExpAdditionalStat / 100));
+            int v = (int) (exp + (exp * userExpAdditionalStat / 100));
 
-            int rewardExp = v + (v / 100 * getMultiply(event));
+            int rewardExp = v + (v  * (getMultiply(event) / 100));
 
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), String.format("huds popup %s exp-message 20 %s",player.getName(),"§a+exp §f"+rewardExp));
 
