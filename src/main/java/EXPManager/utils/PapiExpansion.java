@@ -43,7 +43,7 @@ public class PapiExpansion extends PlaceholderExpansion {
             return String.valueOf(multiply);
         }
         if(Objects.equals(string, "duration")) {
-            int duration = ElixirRepository.getInstance().getElixirCache().get(player.getUniqueId().toString()).getDuration();
+            int duration = PlayerRepository.players.get(player.getUniqueId().toString()).getLeftDuration();
             return String.valueOf(duration);
         }
         return "";

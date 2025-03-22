@@ -15,7 +15,9 @@ import EXPManager.dto.PlayerDto;
 import io.lumine.mythic.bukkit.events.MythicMobDeathEvent;
 import io.lumine.mythic.lib.api.player.MMOPlayerData;
 import io.lumine.mythic.lib.api.stat.StatMap;
+
 import java.util.Map;
+
 import net.Indyuce.mmocore.api.MMOCoreAPI;
 import net.Indyuce.mmocore.experience.EXPSource;
 import net.Indyuce.mmoitems.MMOItems;
@@ -29,10 +31,10 @@ import org.bukkit.inventory.ItemStack;
 
 public class EXPListener implements Listener {
 
-    public  ElixirRepository elixirRepository;
-    public  MonsterRepository monsterRepository;
-    public  PlayerRepository playerRepository;
-    public  ConfigRepository configRepository;
+    public ElixirRepository elixirRepository;
+    public MonsterRepository monsterRepository;
+    public PlayerRepository playerRepository;
+    public ConfigRepository configRepository;
 
     public EXPListener() {
         this.playerRepository = PlayerRepository.getInstance();
@@ -49,7 +51,7 @@ public class EXPListener implements Listener {
         Map<String, ElixirDto> elixirCache = elixirRepository.getElixirCache();
 
         String playerRightHandItemId = MMOItems.getID(itemInMainHand);
-        if(event.getAction().isRightClick() && elixirCache.containsKey(playerRightHandItemId)) {
+        if (event.getAction().isRightClick() && elixirCache.containsKey(playerRightHandItemId)) {
             event.setCancelled(true);
 
             if (itemInMainHand.getAmount() > 1) {
@@ -79,7 +81,7 @@ public class EXPListener implements Listener {
         ConfigDto configDto = configRepository.getConfigDto();
         int levelDiffLimit = configDto.getLevelDiffLimit();
 
-        if(!(event.getKiller() instanceof Player player)){
+        if (!(event.getKiller() instanceof Player player)) {
             return;
         }
         String killedMonsterName = event.getMob().getType().getInternalName();
@@ -92,24 +94,26 @@ public class EXPListener implements Listener {
             int playerLevel = mmoCoreAPI.getPlayerData(player).getLevel();
 
 
-
             MonsterDto monsterDto = monsters.get(killedMonsterName);
             MMOPlayerData mmoPlayerData = MMOPlayerData.get(player.getUniqueId());
             StatMap statMap = mmoPlayerData.getStatMap();
 
             double userExpAdditionalStat = statMap.getStat("ADDITIONAL_EXPERIENCE");
-            int exp = monsterDto.getExp();
-            int v = (int) (exp + (exp * userExpAdditionalStat / 100));
+            int basicExp = monsterDto.getExp();
+            int elixirMultiply = players.get(player.getUniqueId().toString()).getMultiply();
 
-            int rewardExp = v + (v  * (getMultiply(event) / 100));
+            int statExp = (int) (basicExp + (basicExp * userExpAdditionalStat / 100));
+
+            int elixirExp = (statExp + (statExp * elixirMultiply / 100));
+
 
             if (Math.abs(mobLevel - playerLevel) >= levelDiffLimit) {
-                player.sendActionBar("§c몬스터와의 레벨 차이가 "+levelDiffLimit+" 이상이어서 경험치가 50% 감소되어 지급됩니다!");
-                rewardExp /= 2;
+                player.sendActionBar("§c몬스터와의 레벨 차이가 " + levelDiffLimit + " 이상이어서 경험치가 50% 감소되어 지급됩니다!");
+                elixirExp /= 2;
             }
-            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), String.format("huds popup %s exp-message 20 %s",player.getName(),"§a+exp §f"+rewardExp));
+            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), String.format("huds popup %s exp-message 20 %s", player.getName(), "§a+exp §f" + elixirExp));
 
-            mmoCoreAPI.getPlayerData(player).giveExperience(rewardExp, EXPSource.OTHER);
+            mmoCoreAPI.getPlayerData(player).giveExperience(elixirExp, EXPSource.OTHER);
         }
     }
 }
