@@ -8,6 +8,8 @@ import EXPManager.listener.EXPListener;
 import EXPManager.listener.PlayerJoinAndQuitListener;
 import EXPManager.scheduler.ElixirScheduler;
 import java.util.Collection;
+
+import EXPManager.utils.PapiExpansion;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -29,6 +31,9 @@ public final class EXPManager extends JavaPlugin {
         Collection<? extends Player> onlinePlayers = Bukkit.getServer().getOnlinePlayers();
         for (Player player : onlinePlayers) {
             PlayerRepository.getInstance().loadPlayerInfo(player);
+        }
+        if(Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")){
+            new PapiExpansion(this).register();
         }
     }
 

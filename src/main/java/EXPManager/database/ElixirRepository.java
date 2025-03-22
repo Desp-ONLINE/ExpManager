@@ -11,7 +11,7 @@ public class ElixirRepository {
 
     private static ElixirRepository instance;
     private final MongoCollection<Document> elixir;
-    private final Map<String, ElixirDto> elixirCache = new HashMap<>();
+    public final Map<String, ElixirDto> elixirCache = new HashMap<>();
 
     private ElixirRepository() {
         DatabaseRegister database = new DatabaseRegister();
