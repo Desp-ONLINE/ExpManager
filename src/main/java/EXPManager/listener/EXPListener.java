@@ -107,7 +107,8 @@ public class EXPListener implements Listener {
             int elixirExp = (statExp + (statExp * elixirMultiply / 100));
 
 
-            if (Math.abs(mobLevel - playerLevel) >= levelDiffLimit) {
+//            if (Math.abs(mobLevel - playerLevel) >= levelDiffLimit) {
+            if(mobLevel >= playerLevel + levelDiffLimit) {
                 player.sendActionBar("§c몬스터와의 레벨 차이가 " + levelDiffLimit + " 이상이어서 경험치가 50% 감소되어 지급됩니다!");
                 elixirExp /= 2;
             }
