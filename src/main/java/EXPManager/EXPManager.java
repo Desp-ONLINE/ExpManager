@@ -4,6 +4,7 @@ import EXPManager.command.EventCommand;
 import EXPManager.database.*;
 import EXPManager.listener.EXPListener;
 import EXPManager.listener.PlayerJoinAndQuitListener;
+import EXPManager.scheduler.EXPEventScheduler;
 import EXPManager.scheduler.ElixirScheduler;
 import java.util.Collection;
 
@@ -22,6 +23,7 @@ public final class EXPManager extends JavaPlugin {
     public void onEnable() {
         instance = this;
         ElixirScheduler.startFatigueReductionTask();
+        EXPEventScheduler.startEventDurationReduceTask();
         register();
 
         Bukkit.getPluginManager().registerEvents(new EXPListener(), this);

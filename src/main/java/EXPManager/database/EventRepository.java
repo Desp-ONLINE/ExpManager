@@ -26,7 +26,11 @@ public class EventRepository {
 
 
     public void reduceDuration() {
-        duration-=1;
+        duration = Math.max(duration - 1, 0);
+        if(duration == 0){
+            multiply = 0;
+        }
+
     }
     public void stopEvent(){
         multiply=0;
