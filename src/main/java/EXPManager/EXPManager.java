@@ -1,9 +1,7 @@
 package EXPManager;
 
-import EXPManager.database.ConfigRepository;
-import EXPManager.database.ElixirRepository;
-import EXPManager.database.MonsterRepository;
-import EXPManager.database.PlayerRepository;
+import EXPManager.command.EventCommand;
+import EXPManager.database.*;
 import EXPManager.listener.EXPListener;
 import EXPManager.listener.PlayerJoinAndQuitListener;
 import EXPManager.scheduler.ElixirScheduler;
@@ -35,6 +33,7 @@ public final class EXPManager extends JavaPlugin {
         if(Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")){
             new PapiExpansion(this).register();
         }
+        getCommand("경험치이벤트").setExecutor(new EventCommand());
     }
 
     @Override
@@ -50,5 +49,6 @@ public final class EXPManager extends JavaPlugin {
         MonsterRepository.getInstance();
         PlayerRepository.getInstance();
         ConfigRepository.getInstance();
+        EventRepository.getInstance();
     }
 }

@@ -4,10 +4,7 @@ import static EXPManager.database.PlayerRepository.players;
 import static EXPManager.utils.PlayerUtils.getMultiply;
 
 import EXPManager.EXPManager;
-import EXPManager.database.ConfigRepository;
-import EXPManager.database.ElixirRepository;
-import EXPManager.database.MonsterRepository;
-import EXPManager.database.PlayerRepository;
+import EXPManager.database.*;
 import EXPManager.dto.ConfigDto;
 import EXPManager.dto.ElixirDto;
 import EXPManager.dto.MonsterDto;
@@ -101,6 +98,7 @@ public class EXPListener implements Listener {
             double userExpAdditionalStat = statMap.getStat("ADDITIONAL_EXPERIENCE");
             int basicExp = monsterDto.getExp();
             int elixirMultiply = players.get(player.getUniqueId().toString()).getMultiply();
+            elixirMultiply += EventRepository.getMultiply();
 
             int statExp = (int) (basicExp + (basicExp * userExpAdditionalStat / 100));
 

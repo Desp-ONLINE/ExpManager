@@ -2,6 +2,7 @@ package EXPManager.utils;
 
 import EXPManager.EXPManager;
 import EXPManager.database.ElixirRepository;
+import EXPManager.database.EventRepository;
 import EXPManager.database.PlayerRepository;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.entity.Player;
@@ -44,6 +45,14 @@ public class PapiExpansion extends PlaceholderExpansion {
         }
         if(Objects.equals(string, "duration")) {
             int duration = PlayerRepository.players.get(player.getUniqueId().toString()).getLeftDuration();
+            return String.valueOf(duration);
+        }
+        if(Objects.equals(string, "eventMultiply")){
+            int multiply = EventRepository.getMultiply();
+            return String.valueOf(multiply);
+        }
+        if(Objects.equals(string, "eventDuration")){
+            int duration = EventRepository.getDuration();
             return String.valueOf(duration);
         }
         return "";

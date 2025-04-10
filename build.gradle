@@ -22,6 +22,7 @@ dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'lib')
     implementation('org.projectlombok:lombok:1.18.36')
     annotationProcessor('org.projectlombok:lombok:1.18.36')
+    compileOnly 'me.clip:placeholderapi:2.11.6'
 }
 
 def targetJavaVersion = 21
