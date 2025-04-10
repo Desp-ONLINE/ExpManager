@@ -1,5 +1,6 @@
 package EXPManager;
 
+import EXPManager.command.ElixirFormulaCommand;
 import EXPManager.command.EventCommand;
 import EXPManager.database.*;
 import EXPManager.listener.EXPListener;
@@ -36,6 +37,7 @@ public final class EXPManager extends JavaPlugin {
             new PapiExpansion(this).register();
         }
         getCommand("경험치이벤트").setExecutor(new EventCommand());
+        getCommand("경험치공식").setExecutor(new ElixirFormulaCommand());
     }
 
     @Override
