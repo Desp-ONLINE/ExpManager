@@ -16,6 +16,9 @@ public class PlayerJoinAndQuitListener implements Listener {
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
         PlayerRepository.getInstance().savePlayerLog(event.getPlayer());
+        EXPListener.getPlayerExpLog().remove(event.getPlayer().getUniqueId().toString());
+        EXPListener.getLatestExpLog().remove(event.getPlayer().getUniqueId().toString());
+        EXPListener.getCountExpLog().remove(event.getPlayer().getUniqueId().toString());
     }
 
 }

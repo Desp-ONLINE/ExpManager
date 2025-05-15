@@ -5,6 +5,7 @@ import EXPManager.command.EventCommand;
 import EXPManager.database.*;
 import EXPManager.listener.EXPListener;
 import EXPManager.listener.PlayerJoinAndQuitListener;
+import EXPManager.placeholder.EXPPlaceholder;
 import EXPManager.scheduler.EXPEventScheduler;
 import EXPManager.scheduler.ElixirScheduler;
 import java.util.Collection;
@@ -27,6 +28,7 @@ public final class EXPManager extends JavaPlugin {
         EXPEventScheduler.startEventDurationReduceTask();
         register();
 
+
         Bukkit.getPluginManager().registerEvents(new EXPListener(), this);
         Bukkit.getPluginManager().registerEvents(new PlayerJoinAndQuitListener(), this);
         Collection<? extends Player> onlinePlayers = Bukkit.getServer().getOnlinePlayers();
@@ -38,6 +40,9 @@ public final class EXPManager extends JavaPlugin {
         }
         getCommand("경험치이벤트").setExecutor(new EventCommand());
         getCommand("경험치공식").setExecutor(new ElixirFormulaCommand());
+        if(Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")){
+            new EXPPlaceholder(this).register();
+        }
     }
 
     @Override

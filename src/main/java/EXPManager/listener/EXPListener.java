@@ -13,8 +13,12 @@ import io.lumine.mythic.bukkit.events.MythicMobDeathEvent;
 import io.lumine.mythic.lib.api.player.MMOPlayerData;
 import io.lumine.mythic.lib.api.stat.StatMap;
 
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.Queue;
 
+import lombok.Getter;
 import net.Indyuce.mmocore.api.MMOCoreAPI;
 import net.Indyuce.mmocore.experience.EXPSource;
 import net.Indyuce.mmoitems.MMOItems;
@@ -25,6 +29,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitRunnable;
 
 public class EXPListener implements Listener {
 
@@ -32,6 +37,22 @@ public class EXPListener implements Listener {
     public MonsterRepository monsterRepository;
     public PlayerRepository playerRepository;
     public ConfigRepository configRepository;
+
+    @Getter
+    private static HashMap<String, Integer> playerExpLog = new HashMap<>();
+    @Getter
+    private static Map<String, Integer> latestExpLog = new HashMap<>();
+    @Getter
+    private static Map<String, Integer> countExpLog = new HashMap<>();
+
+    private static EXPListener instance;
+
+    public static EXPListener getInstance() {
+        if (instance == null) {
+            instance = new EXPListener();
+        }
+        return instance;
+    }
 
     public EXPListener() {
         this.playerRepository = PlayerRepository.getInstance();
@@ -106,11 +127,22 @@ public class EXPListener implements Listener {
 
 
 //            if (Math.abs(mobLevel - playerLevel) >= levelDiffLimit) {
-            if(mobLevel >= playerLevel + levelDiffLimit) {
+            if (mobLevel >= playerLevel + levelDiffLimit) {
                 player.sendActionBar("§c몬스터와의 레벨 차이가 " + levelDiffLimit + " 이상이어서 경험치가 50% 감소되어 지급됩니다!");
                 elixirExp /= 2;
             }
-            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), String.format("huds popup %s exp-message 20 %s", player.getName(), "§a+exp §f" + elixirExp));
+            int resultExp = elixirExp;
+            if (playerExpLog.containsKey(player.getUniqueId().toString())) {
+                resultExp = playerExpLog.get(player.getUniqueId().toString()) + elixirExp;
+            }
+            if (!countExpLog.containsKey(player.getUniqueId().toString())) {
+                countExpLog.put(player.getUniqueId().toString(), 0);
+            }
+            playerExpLog.put(player.getUniqueId().toString(), resultExp);
+            latestExpLog.put(player.getUniqueId().toString(), elixirExp);
+            countExpLog.put(player.getUniqueId().toString(), countExpLog.get(player.getUniqueId().toString()) + 1);
+            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "hud pop show "+player.getName()+" exp_popup");
+
 
             mmoCoreAPI.getPlayerData(player).giveExperience(elixirExp, EXPSource.OTHER);
         }
