@@ -27,7 +27,9 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -64,6 +66,10 @@ public class EXPListener implements Listener {
     @EventHandler
     public void onPlayerUseElixir(PlayerInteractEvent event) {
         Player player = event.getPlayer();
+        EquipmentSlot hand = event.getHand();
+        if (hand != null && hand != EquipmentSlot.HAND) {
+            return;
+        }
         ItemStack itemInMainHand = player.getInventory().getItemInMainHand();
 
         Map<String, ElixirDto> elixirCache = elixirRepository.getElixirCache();
