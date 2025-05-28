@@ -124,6 +124,16 @@ public class EXPListener implements Listener {
 
             double userExpAdditionalStat = statMap.getStat("ADDITIONAL_EXPERIENCE");
             int basicExp = monsterDto.getExp();
+            if (playerLevel <= 20) {
+                basicExp = (int) (basicExp + basicExp * 0.25);
+            }
+            else if (playerLevel <= 45) {
+                basicExp = (int) (basicExp + basicExp * 0.10);
+            }
+            else if (playerLevel <= 70) {
+                basicExp = (int) (basicExp + basicExp * 0.5);
+            }
+
             int elixirMultiply = players.get(player.getUniqueId().toString()).getMultiply();
             elixirMultiply += EventRepository.getMultiply();
 
@@ -147,7 +157,8 @@ public class EXPListener implements Listener {
             playerExpLog.put(player.getUniqueId().toString(), resultExp);
             latestExpLog.put(player.getUniqueId().toString(), elixirExp);
             countExpLog.put(player.getUniqueId().toString(), countExpLog.get(player.getUniqueId().toString()) + 1);
-            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "hud pop show "+player.getName()+" exp_popup");
+
+            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "hud pop show " + player.getName() + " exp_popup");
 
 
             mmoCoreAPI.getPlayerData(player).giveExperience(elixirExp, EXPSource.OTHER);
