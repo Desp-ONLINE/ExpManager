@@ -125,13 +125,16 @@ public class EXPListener implements Listener {
             double userExpAdditionalStat = statMap.getStat("ADDITIONAL_EXPERIENCE");
             int basicExp = monsterDto.getExp();
             if (playerLevel <= 20) {
-                basicExp = (int) (basicExp + basicExp * 0.25);
+                basicExp = (int) (basicExp + basicExp * 0.40);
             }
             else if (playerLevel <= 45) {
-                basicExp = (int) (basicExp + basicExp * 0.10);
+                basicExp = (int) (basicExp + basicExp * 0.30);
             }
             else if (playerLevel <= 70) {
-                basicExp = (int) (basicExp + basicExp * 0.5);
+                basicExp = (int) (basicExp + basicExp * 0.20);
+            }
+            else if (playerLevel <= 100) {
+                basicExp = (int) (basicExp + basicExp * 0.10);
             }
 
             int elixirMultiply = players.get(player.getUniqueId().toString()).getMultiply();
