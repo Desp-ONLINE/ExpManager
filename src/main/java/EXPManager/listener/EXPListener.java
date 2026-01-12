@@ -124,19 +124,28 @@ public class EXPListener implements Listener {
 
             double userExpAdditionalStat = statMap.getStat("ADDITIONAL_EXPERIENCE");
             int basicExp = monsterDto.getExp();
-            if (playerLevel <= 20) {
-                basicExp = (int) (basicExp + basicExp * 1.00);
-            }
-            else if (playerLevel <= 45) {
-                basicExp = (int) (basicExp + basicExp * 0.95);
-            }
-            else if (playerLevel <= 70) {
-                basicExp = (int) (basicExp + basicExp * 0.90);
-            }
-            else if (playerLevel <= 100) {
-                basicExp = (int) (basicExp + basicExp * 0.80);
-            }else if (playerLevel <= 130) {
-                basicExp = (int) (basicExp + basicExp * 0.40);
+            if (playerLevel <= 10) {
+                basicExp = (int) (basicExp + basicExp * 2.00);
+            } else if (playerLevel <= 20) {
+                basicExp = (int) (basicExp + basicExp * 1.90);
+            } else if (playerLevel <= 30) {
+                basicExp = (int) (basicExp + basicExp * 1.80);
+            } else if (playerLevel <= 40) {
+                basicExp = (int) (basicExp + basicExp * 1.70);
+            } else if (playerLevel <= 50) {
+                basicExp = (int) (basicExp + basicExp * 1.60);
+            } else if (playerLevel <= 60) {
+                basicExp = (int) (basicExp + basicExp * 1.50);
+            } else if (playerLevel <= 70) {
+                basicExp = (int) (basicExp + basicExp * 1.40);
+            } else if (playerLevel <= 80) {
+                basicExp = (int) (basicExp + basicExp * 1.30);
+            } else if (playerLevel <= 90) {
+                basicExp = (int) (basicExp + basicExp * 1.20);
+            } else if (playerLevel <= 100) {
+                basicExp = (int) (basicExp + basicExp * 1.10);
+            } else if (playerLevel <= 130) {
+                basicExp = (int) (basicExp + basicExp * 0.70);
             }
 
             int elixirMultiply = players.get(player.getUniqueId().toString()).getMultiply();
