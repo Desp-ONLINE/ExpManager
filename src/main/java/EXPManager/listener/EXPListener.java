@@ -20,6 +20,7 @@ import java.util.Queue;
 
 import lombok.Getter;
 import net.Indyuce.mmocore.api.MMOCoreAPI;
+import net.Indyuce.mmocore.api.player.profess.PlayerClass;
 import net.Indyuce.mmocore.experience.EXPSource;
 import net.Indyuce.mmoitems.MMOItems;
 import org.bukkit.Bukkit;
@@ -32,6 +33,8 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.dople.dataSync.inventory.InventorySyncListener;
+import org.dople.levelUpBurning.api.LevelUpBurningAPI;
 
 public class EXPListener implements Listener {
 
@@ -70,6 +73,7 @@ public class EXPListener implements Listener {
         if (hand != null && hand != EquipmentSlot.HAND) {
             return;
         }
+
         ItemStack itemInMainHand = player.getInventory().getItemInMainHand();
 
         Map<String, ElixirDto> elixirCache = elixirRepository.getElixirCache();
@@ -77,6 +81,10 @@ public class EXPListener implements Listener {
         String playerRightHandItemId = MMOItems.getID(itemInMainHand);
         if (event.getAction().isRightClick() && elixirCache.containsKey(playerRightHandItemId)) {
             event.setCancelled(true);
+            if(InventorySyncListener.isDataLoading(player)){
+                player.sendMessage("§c 데이터가 로드중입니다.");
+                return;
+            }
 
             if (itemInMainHand.getAmount() > 1) {
                 itemInMainHand.setAmount(itemInMainHand.getAmount() - 1);
@@ -124,29 +132,40 @@ public class EXPListener implements Listener {
 
             double userExpAdditionalStat = statMap.getStat("ADDITIONAL_EXPERIENCE");
             int basicExp = monsterDto.getExp();
+
+            double burningBonus = 0.0;
+            if (playerLevel <= 100) {
+                PlayerClass profess = mmoCoreAPI.getPlayerData(player).getProfess();
+                String burningClassId = LevelUpBurningAPI.getBurningClassId(player.getUniqueId());
+                if (profess.getName().equals(burningClassId)) {
+                    burningBonus = 1.00;
+                }
+            }
+
             if (playerLevel <= 10) {
-                basicExp = (int) (basicExp + basicExp * 2.00);
+                basicExp = (int) (basicExp + basicExp * (2.20 + burningBonus));
             } else if (playerLevel <= 20) {
-                basicExp = (int) (basicExp + basicExp * 1.90);
+                basicExp = (int) (basicExp + basicExp * (2.10 + burningBonus));
             } else if (playerLevel <= 30) {
-                basicExp = (int) (basicExp + basicExp * 1.80);
+                basicExp = (int) (basicExp + basicExp * (2.00 + burningBonus));
             } else if (playerLevel <= 40) {
-                basicExp = (int) (basicExp + basicExp * 1.70);
+                basicExp = (int) (basicExp + basicExp * (1.80 + burningBonus));
             } else if (playerLevel <= 50) {
-                basicExp = (int) (basicExp + basicExp * 1.60);
+                basicExp = (int) (basicExp + basicExp * (1.70 + burningBonus));
             } else if (playerLevel <= 60) {
-                basicExp = (int) (basicExp + basicExp * 1.50);
+                basicExp = (int) (basicExp + basicExp * (1.60 + burningBonus));
             } else if (playerLevel <= 70) {
-                basicExp = (int) (basicExp + basicExp * 1.40);
+                basicExp = (int) (basicExp + basicExp * (1.55 + burningBonus));
             } else if (playerLevel <= 80) {
-                basicExp = (int) (basicExp + basicExp * 1.30);
+                basicExp = (int) (basicExp + basicExp * (1.50 + burningBonus));
             } else if (playerLevel <= 90) {
-                basicExp = (int) (basicExp + basicExp * 1.20);
+                basicExp = (int) (basicExp + basicExp * (1.45 + burningBonus));
             } else if (playerLevel <= 100) {
-                basicExp = (int) (basicExp + basicExp * 1.10);
+                basicExp = (int) (basicExp + basicExp * (1.10 + burningBonus));
             } else if (playerLevel <= 130) {
                 basicExp = (int) (basicExp + basicExp * 0.70);
             }
+
 
             int elixirMultiply = players.get(player.getUniqueId().toString()).getMultiply();
             elixirMultiply += EventRepository.getMultiply();
@@ -156,10 +175,10 @@ public class EXPListener implements Listener {
             int elixirExp = (statExp + (statExp * elixirMultiply / 100));
 
 
-//            if (Math.abs(mobLevel - playerLevel) >= levelDiffLimit) {
-            if (mobLevel >= playerLevel + levelDiffLimit) {
-                player.sendActionBar("§c몬스터와의 레벨 차이가 " + levelDiffLimit + " 이상이어서 경험치가 50% 감소되어 지급됩니다!");
-                elixirExp /= 2;
+            if (Math.abs(mobLevel - playerLevel) >= levelDiffLimit) {
+//            if (mobLevel >= playerLevel + levelDiffLimit) {
+                player.sendActionBar("§c몬스터와의 레벨 차이가 " + levelDiffLimit + " 이상이어서 경험치가 80% 감소되어 지급됩니다!");
+                elixirExp *= 0.2;
             }
             int resultExp = elixirExp;
             if (playerExpLog.containsKey(player.getUniqueId().toString())) {
